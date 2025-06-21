@@ -1,10 +1,7 @@
 # Catz & Dogz Photo Viewer
 
 A simple, clean, and mobile-friendly web application that displays random pictures of cats and dogs using public APIs. Share the cuteness with friends or download your favorite images!
-
 ---
-
-## live Demo
 
 Try the live version here: **[CatsAndDogs](https://ambiguouserror.github.io/CatsAndDogs/)** 
 ---
