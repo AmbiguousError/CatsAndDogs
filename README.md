@@ -6,8 +6,7 @@ A simple, clean, and mobile-friendly web application that displays random pictur
 
 ## live Demo
 
-Try the live version here: **[your-github-pages-url]** *(Replace `[your-github-pages-url]` with the actual link once you deploy it on GitHub Pages.)*
-
+Try the live version here: **[[CatsAndDogs](https://ambiguouserror.github.io/CatsAndDogs/)]** 
 ---
 
 ## Features
@@ -17,25 +16,6 @@ Try the live version here: **[your-github-pages-url]** *(Replace `[your-github-p
 -   **Share:** Use the "Share" button to send the image link to friends using your device's native sharing options (on supported browsers) or copy the URL to your clipboard.
 -   **Mobile-First Design:** The layout is fully responsive and works beautifully on desktops, tablets, and smartphones.
 -   **Lightweight & Fast:** Built with vanilla HTML, CSS, and JavaScript, making it quick to load and use.
-
----
-
-## How To Use
-
-Since this is a simple project with no build steps, you can run it directly in your browser.
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
-    ```
-
-2.  **Navigate to the directory:**
-    ```bash
-    cd your-repository-name
-    ```
-
-3.  **Open the file:**
-    Simply open the `index.html` file in your favorite web browser.
 
 ---
 
