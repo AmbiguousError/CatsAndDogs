@@ -6,7 +6,7 @@ A simple, clean, and mobile-friendly web application that displays random pictur
 
 ## live Demo
 
-Try the live version here: **[[CatsAndDogs](https://ambiguouserror.github.io/CatsAndDogs/)]** 
+Try the live version here: **[CatsAndDogs(https://ambiguouserror.github.io/CatsAndDogs/)]** 
 ---
 
 ## Features
