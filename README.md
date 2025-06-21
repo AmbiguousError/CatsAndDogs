@@ -2,8 +2,6 @@
 
 A simple, clean, and mobile-friendly web application that displays random pictures of cats and dogs using public APIs. Share the cuteness with friends or download your favorite images!
 
-![A screenshot of the Catz & Dogz web application showing a picture of a cat, with buttons for Catz, Dogz, Download, and Share.](https://placehold.co/600x400/007bff/ffffff?text=App+Screenshot)
-
 ---
 
 ## live Demo
