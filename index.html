@@ -14,10 +14,15 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            text-align: center;
         }
 
-        .button-container {
+        .controls-container {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
 
         button {
@@ -26,62 +31,145 @@
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            margin: 0 10px;
-            background-color: #007bff;
             color: white;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #catz { background-color: #007bff; }
+        #dogz { background-color: #28a745; }
+        #download { background-color: #ffc107; color: #212529;}
+        #share { background-color: #17a2b8; }
+
+        #catz:hover { background-color: #0056b3; }
+        #dogz:hover { background-color: #1e7e34; }
+        #download:hover { background-color: #e0a800; }
+        #share:hover { background-color: #117a8b; }
+
+        .image-container {
+            margin-bottom: 20px;
         }
 
         #animal-photo {
             max-width: 90%;
-            max-height: 80vh;
+            max-height: 70vh;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: block;
+            margin: auto;
+        }
+        #loader {
+            display: none;
+            font-size: 1.2em;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="button-container">
-        <button id="catz">Catz</button>
-        <button id="dogz">Dogz</button>
+    <h1>Catz & Dogz</h1>
+
+    <div class="controls-container">
+        <button id="catz">New Cat</button>
+        <button id="dogz">New Dog</button>
     </div>
 
-    <img id="animal-photo" src="" alt="A cute animal photo will appear here">
+    <div class="image-container">
+         <p id="loader">Loading...</p>
+         <img id="animal-photo" src="" alt="A cute animal photo will appear here">
+    </div>
+
+    <div class="controls-container">
+        <button id="download">Download</button>
+        <button id="share">Share</button>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const catzButton = document.getElementById('catz');
             const dogzButton = document.getElementById('dogz');
+            const downloadButton = document.getElementById('download');
+            const shareButton = document.getElementById('share');
             const animalPhoto = document.getElementById('animal-photo');
+            const loader = document.getElementById('loader');
 
-            const fetchCatPhoto = () => {
-                fetch('https://api.thecatapi.com/v1/images/search')
+            let currentImageUrl = '';
+
+            const showLoader = (isLoading) => {
+                loader.style.display = isLoading ? 'block' : 'none';
+                animalPhoto.style.display = isLoading ? 'none' : 'block';
+            }
+
+            const fetchPhoto = (url) => {
+                showLoader(true);
+                fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        animalPhoto.src = data[0].url;
+                        currentImageUrl = data[0].url;
+                        animalPhoto.src = currentImageUrl;
                     })
-                    .catch(error => console.error('Error fetching cat photo:', error));
+                    .catch(error => {
+                        console.error('Error fetching photo:', error);
+                        loader.textContent = 'Failed to load image. Please try again.';
+                    })
+                    .finally(() => {
+                        // Hide loader once the image has tried to load
+                        animalPhoto.onload = () => showLoader(false);
+                        animalPhoto.onerror = () => {
+                             loader.textContent = 'Failed to load image. Please try again.';
+                             showLoader(true);
+                             animalPhoto.style.display = 'none';
+                        }
+                    });
             };
 
-            const fetchDogPhoto = () => {
-                fetch('https://api.thedogapi.com/v1/images/search')
-                    .then(response => response.json())
-                    .then(data => {
-                        animalPhoto.src = data[0].url;
+            const downloadImage = () => {
+                if (!currentImageUrl) return;
+                fetch(currentImageUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        const anchor = document.createElement('a');
+                        anchor.href = blobUrl;
+                        anchor.download = `animal-${Date.now()}.${blob.type.split('/')[1] || 'jpg'}`;
+                        document.body.appendChild(anchor);
+                        anchor.click();
+                        document.body.removeChild(anchor);
+                        URL.revokeObjectURL(blobUrl);
                     })
-                    .catch(error => console.error('Error fetching dog photo:', error));
+                    .catch(error => console.error('Error downloading image:', error));
             };
 
-            catzButton.addEventListener('click', fetchCatPhoto);
-            dogzButton.addEventListener('click', fetchDogPhoto);
+            const shareImage = () => {
+                if (!currentImageUrl) return;
 
-            // Load an initial cat photo
-            fetchCatPhoto();
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Cute Animal Photo!',
+                        text: 'Check out this cute animal I found!',
+                        url: currentImageUrl,
+                    })
+                    .then(() => console.log('Successful share'))
+                    .catch((error) => console.log('Error sharing', error));
+                } else {
+                    // Fallback for browsers that do not support the Web Share API
+                    navigator.clipboard.writeText(currentImageUrl).then(() => {
+                         alert('Web Share not supported. Image URL copied to clipboard!');
+                    });
+                }
+            };
+
+            catzButton.addEventListener('click', () => fetchPhoto('https://api.thecatapi.com/v1/images/search'));
+            dogzButton.addEventListener('click', () => fetchPhoto('https://api.thedogapi.com/v1/images/search'));
+            downloadButton.addEventListener('click', downloadImage);
+            shareButton.addEventListener('click', shareImage);
+
+            // Load an initial cat photo on page load
+            fetchPhoto('https://api.thecatapi.com/v1/images/search');
         });
     </script>
 
