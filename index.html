@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catz & Dogz</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .button-container {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #animal-photo {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="button-container">
+        <button id="catz">Catz</button>
+        <button id="dogz">Dogz</button>
+    </div>
+
+    <img id="animal-photo" src="" alt="A cute animal photo will appear here">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const catzButton = document.getElementById('catz');
+            const dogzButton = document.getElementById('dogz');
+            const animalPhoto = document.getElementById('animal-photo');
+
+            const fetchCatPhoto = () => {
+                fetch('https://api.thecatapi.com/v1/images/search')
+                    .then(response => response.json())
+                    .then(data => {
+                        animalPhoto.src = data[0].url;
+                    })
+                    .catch(error => console.error('Error fetching cat photo:', error));
+            };
+
+            const fetchDogPhoto = () => {
+                fetch('https://api.thedogapi.com/v1/images/search')
+                    .then(response => response.json())
+                    .then(data => {
+                        animalPhoto.src = data[0].url;
+                    })
+                    .catch(error => console.error('Error fetching dog photo:', error));
+            };
+
+            catzButton.addEventListener('click', fetchCatPhoto);
+            dogzButton.addEventListener('click', fetchDogPhoto);
+
+            // Load an initial cat photo
+            fetchCatPhoto();
+        });
+    </script>
+
+</body>
+</html>
