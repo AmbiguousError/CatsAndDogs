@@ -6,37 +6,70 @@
     <title>Catz & Dogz</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background-color: #f4f6f9;
             text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .image-container {
+            margin-bottom: 20px;
+            min-height: 70vh; /* Reserve space to reduce layout shift */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #animal-photo {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            display: none; /* Hide until loaded */
+        }
+
+        #loader {
+            display: block;
+            font-size: 1.2em;
+            color: #777;
         }
 
         .controls-container {
-            margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             color: white;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        button:active {
-            transform: scale(0.98);
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:not(:disabled):active {
+            transform: scale(0.97);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         #catz { background-color: #007bff; }
@@ -44,47 +77,28 @@
         #download { background-color: #ffc107; color: #212529;}
         #share { background-color: #17a2b8; }
 
-        #catz:hover { background-color: #0056b3; }
-        #dogz:hover { background-color: #1e7e34; }
-        #download:hover { background-color: #e0a800; }
-        #share:hover { background-color: #117a8b; }
+        #catz:hover:not(:disabled) { background-color: #0069d9; }
+        #dogz:hover:not(:disabled) { background-color: #218838; }
+        #download:hover:not(:disabled) { background-color: #e0a800; }
+        #share:hover:not(:disabled) { background-color: #138496; }
 
-        .image-container {
-            margin-bottom: 20px;
-        }
-
-        #animal-photo {
-            max-width: 90%;
-            max-height: 70vh;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: block;
-            margin: auto;
-        }
-        #loader {
-            display: none;
-            font-size: 1.2em;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>Catz & Dogz</h1>
-
     <div class="controls-container">
-        <button id="catz">New Cat</button>
-        <button id="dogz">New Dog</button>
+        <button id="catz">Catz</button>
+        <button id="dogz">Dogz</button>
     </div>
 
     <div class="image-container">
-         <p id="loader">Loading...</p>
-         <img id="animal-photo" src="" alt="A cute animal photo will appear here">
+         <p id="loader">Loading a cute animal...</p>
+         <img id="animal-photo" src="" alt="A cute animal will appear here">
     </div>
 
     <div class="controls-container">
-        <button id="download">Download</button>
-        <button id="share">Share</button>
+        <button id="download" disabled>Download</button>
+        <button id="share" disabled>Share</button>
     </div>
 
 
@@ -102,50 +116,60 @@
             const showLoader = (isLoading) => {
                 loader.style.display = isLoading ? 'block' : 'none';
                 animalPhoto.style.display = isLoading ? 'none' : 'block';
+                downloadButton.disabled = isLoading;
+                shareButton.disabled = isLoading;
             }
 
-            const fetchPhoto = (url) => {
+            const fetchPhoto = (apiUrl) => {
                 showLoader(true);
-                fetch(url)
-                    .then(response => response.json())
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         currentImageUrl = data[0].url;
                         animalPhoto.src = currentImageUrl;
+                        animalPhoto.onload = () => showLoader(false);
+                        animalPhoto.onerror = () => {
+                             loader.textContent = 'Failed to load image. Please try again.';
+                             showLoader(true); // Keep loader visible on error
+                             animalPhoto.style.display = 'none';
+                        }
                     })
                     .catch(error => {
                         console.error('Error fetching photo:', error);
                         loader.textContent = 'Failed to load image. Please try again.';
-                    })
-                    .finally(() => {
-                        // Hide loader once the image has tried to load
-                        animalPhoto.onload = () => showLoader(false);
-                        animalPhoto.onerror = () => {
-                             loader.textContent = 'Failed to load image. Please try again.';
-                             showLoader(true);
-                             animalPhoto.style.display = 'none';
-                        }
                     });
             };
 
             const downloadImage = () => {
-                if (!currentImageUrl) return;
+                if (!currentImageUrl || downloadButton.disabled) return;
+
                 fetch(currentImageUrl)
                     .then(response => response.blob())
                     .then(blob => {
                         const blobUrl = URL.createObjectURL(blob);
                         const anchor = document.createElement('a');
                         anchor.href = blobUrl;
-                        anchor.download = `animal-${Date.now()}.${blob.type.split('/')[1] || 'jpg'}`;
+                        // Extract file extension from URL or blob type
+                        const fileExtension = currentImageUrl.split('.').pop().split('?')[0] || blob.type.split('/')[1] || 'jpg';
+                        anchor.download = `animal-${Date.now()}.${fileExtension}`;
                         document.body.appendChild(anchor);
                         anchor.click();
                         document.body.removeChild(anchor);
                         URL.revokeObjectURL(blobUrl);
                     })
-                    .catch(error => console.error('Error downloading image:', error));
+                    .catch(error => {
+                        console.error('Error downloading image:', error);
+                        alert('Could not download image.');
+                    });
             };
 
             const shareImage = () => {
-                if (!currentImageUrl) return;
+                if (!currentImageUrl || shareButton.disabled) return;
 
                 if (navigator.share) {
                     navigator.share({
@@ -156,9 +180,11 @@
                     .then(() => console.log('Successful share'))
                     .catch((error) => console.log('Error sharing', error));
                 } else {
-                    // Fallback for browsers that do not support the Web Share API
+                    // Fallback for desktop browsers
                     navigator.clipboard.writeText(currentImageUrl).then(() => {
-                         alert('Web Share not supported. Image URL copied to clipboard!');
+                         alert('Web Share API not supported. Image URL copied to clipboard!');
+                    }, () => {
+                        alert('Could not copy URL to clipboard.');
                     });
                 }
             };
@@ -168,7 +194,7 @@
             downloadButton.addEventListener('click', downloadImage);
             shareButton.addEventListener('click', shareImage);
 
-            // Load an initial cat photo on page load
+            // Load an initial photo on page load
             fetchPhoto('https://api.thecatapi.com/v1/images/search');
         });
     </script>
